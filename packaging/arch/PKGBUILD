@@ -42,12 +42,13 @@ check() {
 package_gpu-unlock-dkms() {
   arch=('any')
   depends=('dkms' "gpu-unlock-firmware=$pkgver-$pkgrel")
-  backup=('etc/mkinitcpio.conf.d/zz-gpu-unlock.conf')
   conflicts=('gpu-unlock-mkinitcpio')
   replaces=('gpu-unlock-mkinitcpio')
   install=gpu-unlock.install
   cd $pkgbase
-  make DESTDIR="$pkgdir" install-dkms install-mkinitcpio
+  make DESTDIR="$pkgdir" install-dkms
+  install -Dm644 packaging/boot/mkinitcpio.conf "$pkgdir/usr/share/doc/gpu-unlock/mkinitcpio.conf"
+  install -Dm644 packaging/boot/mkinitcpio-experimental.conf "$pkgdir/usr/share/doc/gpu-unlock/mkinitcpio-experimental.conf"
   make DESTDIR="$pkgdir" PKG=$pkgname install-licenses
 }
 

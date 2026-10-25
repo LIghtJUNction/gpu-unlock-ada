@@ -75,6 +75,7 @@ install-dkms:
 	grep -q 'MODULE_VERSION("$(VERSION)")' kernel/gpu_unlock/main.c
 	install -Dm644 -t $(DESTDIR)$(DKMSDIR) $(MODULE_FILES)
 	install -Dm644 README.md $(DESTDIR)/usr/share/doc/gpu-unlock/README.md
+	install -Dm644 docs/lightjunction-28a0.md $(DESTDIR)/usr/share/doc/gpu-unlock/docs/lightjunction-28a0.md
 
 # The generators check every file against its pinned SHA-256 before writing it.
 install-firmware:

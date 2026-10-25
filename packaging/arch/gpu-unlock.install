@@ -1,10 +1,10 @@
 post_install() {
   cat <<'EOF'
-==> gpu_unlock now loads ahead of nvidia on every boot but does nothing until
-==> you opt in on the kernel command line:
-==>   gpu_unlock.targets=all              every unbound RTX 3090
-==>   gpu_unlock.targets=0000:21:00.0     only these PCI addresses (comma-separated)
-==> Remove the option in your bootloader to boot without the unlock.
-==> See /usr/share/doc/gpu-unlock/README.md.
+==> The experimental module is installed without adding it to normal images.
+==> Build a separate image with:
+==>   mkinitcpio -c /usr/share/doc/gpu-unlock/mkinitcpio-experimental.conf ...
+==> Keep a normal boot entry. Opt in only in the experimental entry with:
+==>   gpu_unlock.targets=YOUR-PCI-ADDRESS gpu_unlock.ad107_experimental=1
+==> See /usr/share/doc/gpu-unlock/docs/lightjunction-28a0.md.
 EOF
 }
