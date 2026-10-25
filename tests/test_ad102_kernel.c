@@ -14,6 +14,10 @@ static void ad102_setup(struct unlock_transaction_work *w)
     setup(w);
     dev.device=mock_profile;
     regs[0]=0x192000a1;
+    if (dev.device==GU_AD107_RTX_4060_LAPTOP) {
+        dev.subsystem_vendor=0x1d05;dev.subsystem_device=0x1274;dev.revision=0xa1;
+        regs[0]=0x197000a1;
+    }
     regs[0x1fa7cc/4]=regs[0x1fa7c4/4]=0x0004cb8f;
     regs[0x9a0148/4]=0xffffff0f;
     regs[GU_FEAT_PLM_OFFSET/4]=0xffffff8f;
@@ -128,10 +132,44 @@ int main(int argc, char **argv)
     printf("Ada profile 0x%04x: assets, marker, permissions, HALT, readout, metadata and retention host mocks PASS\n",mock_profile);
     }
     mock_profile=GU_AD102_RTX_4090;
+    /* Direct callers must not bypass board admission, even before firmware
+     * requests. A wrong/inaccessible chip stops before layout or DMA. */
+    for(int field=0;field<4;field++) {
+        mock_profile=GU_AD107_RTX_4060_LAPTOP;ad102_setup(&w);
+        if(field==0)dev.vendor=0x1234;
+        if(field==1)dev.subsystem_vendor=0x1043;
+        if(field==2)dev.subsystem_device=0x1275;
+        if(field==3)dev.revision=0xa2;
+        const struct gpu_unlock_610_shared shared={0};last_work=NULL;
+        assert(gpu_unlock_610_unlock(&dev,&shared)==-EOPNOTSUPP);
+        assert(!last_work && !fake.fw_requests && !fake.allocs && !fake.writes);
+    }
+    const u32 bad_chips[]={0,0xffffffff,0xbadf0000,0x192000a1,0x197000a2};
+    for(unsigned i=0;i<ARRAY_SIZE(bad_chips);i++) {
+        ad102_setup(&w);regs[0]=bad_chips[i];
+        assert(unlock_transaction_identity(&w)==-ENODEV);
+        assert(!fake.allocs && !fake.writes && !fake.starts && !fake.gsp_starts);
+    }
+    ad102_setup(&w);assert(!unlock_transaction_identity(&w));
+    mock_profile=GU_AD102_RTX_4090;
+    puts("AD107 board/chip admission precedes firmware/DMA/layout host mocks PASS");
     /* Real asset parsing, pinning, publication, restore, FLR and retention;
      * all register behavior is supplied by this host-only harness. */
     if(argc==3) {
         asset_root=argv[2];full_active=true;
+        /* Exercise the real entry point: bad chip identity must abort after
+         * BAR mapping, before the otherwise-invalid layout or any DMA/write. */
+        mock_profile=GU_AD107_RTX_4060_LAPTOP;
+        for(unsigned i=0;i<ARRAY_SIZE(bad_chips);i++) {
+            ad102_setup(&w);regs[0]=bad_chips[i];
+            struct gpu_unlock_610_shared shared={0};last_work=NULL;
+            assert(!gpu_unlock_610_load_shared(&dev,&shared));
+            assert(gpu_unlock_610_unlock(&dev,&shared)==-ENODEV);
+            gpu_unlock_610_release_shared(&shared);
+            assert(!fake.allocs && !fake.writes && !fake.starts && !fake.gsp_starts && !fake.flrs);
+            assert(!fake.regions && !fake.fw_live && dev.refs==1);
+        }
+        mock_profile=GU_AD102_RTX_4090;
         static const int cases[]={0,1,2,4,6,7,8,10};
         for(unsigned i=0;i<ARRAY_SIZE(cases);i++) {
             ad102_setup(&w);fake.ad_mode=cases[i];load_rom(argv[1]);

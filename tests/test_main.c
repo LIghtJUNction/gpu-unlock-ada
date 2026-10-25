@@ -194,6 +194,11 @@ static void add(const char *name, unsigned short device, bool bound)
 
 	*pdev = (struct pci_dev){ .name = name, .vendor = PCI_VENDOR_ID_NVIDIA, .device = device,
 				  .driver = bound ? &driver_marker : NULL, .refs = 1 };
+	if (device == GU_AD107_RTX_4060_LAPTOP) {
+		pdev->subsystem_vendor = 0x1d05;
+		pdev->subsystem_device = 0x1274;
+		pdev->revision = 0xa1;
+	}
 	pthread_mutex_init(&pdev->lock, NULL);
 }
 
@@ -412,6 +417,19 @@ int main(void)
 		assert(!fake.loads && !fake.started);
 	}
 	puts("ad107: independent exact-ID/single-BDF gates PASS");
+	/* An exact GPU ID and opt-in still cannot admit a different laptop board. */
+	for (int field = 0; field < 3; field++) {
+		reset("0000:01:00.0");
+		ad107_experimental = true;
+		add("0000:01:00.0", GU_AD107_RTX_4060_LAPTOP, false);
+		if (field == 0) devices[0].subsystem_vendor = 0x1043;
+		if (field == 1) devices[0].subsystem_device = 0x1275;
+		if (field == 2) devices[0].revision = 0xa2;
+		run();
+		assert(!fake.loads && !fake.started && !fake.unlocks[0]);
+		assert(logged("no supported card"));
+	}
+	puts("ad107: other subsystems/revisions rejected before firmware requests PASS");
 
 	/* No opt-in on the command line: the module does nothing. */
 	for (int empty = 0; empty < 2; empty++) {

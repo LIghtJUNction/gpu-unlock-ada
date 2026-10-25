@@ -2,9 +2,23 @@
 # SPDX-License-Identifier: GPL-2.0-only
 """Print exact, supported NVIDIA PCI boot options without changing the host."""
 import argparse
+from pathlib import Path
 import re
 import subprocess
 import sys
+
+SYSFS_ROOT = Path("/sys/bus/pci/devices")
+
+
+def ad107_board_matches(address: str) -> bool:
+    expected = {"vendor": 0x10de, "device": 0x28a0,
+                "subsystem_vendor": 0x1d05, "subsystem_device": 0x1274,
+                "revision": 0xa1}
+    try:
+        return all(int((SYSFS_ROOT / address / name).read_text().strip(), 0) == value
+                   for name, value in expected.items())
+    except (OSError, ValueError):
+        return False
 
 
 def candidates(lspci_output: str, exact28a0: bool = False) -> list[tuple[str, str]]:
@@ -14,14 +28,17 @@ def candidates(lspci_output: str, exact28a0: bool = False) -> list[tuple[str, st
         address = re.match(r"^([0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7])\s", line)
         device = re.search(rf"\[10de:({ids})\]", line, re.I)
         if address and device:
-            found.append((address.group(1).lower(), device.group(1).lower()))
+            bdf, pci_id = address.group(1).lower(), device.group(1).lower()
+            if pci_id == "28a0" and not ad107_board_matches(bdf):
+                continue
+            found.append((bdf, pci_id))
     return found
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exact28a0", action="store_true",
-                        help="include experimental exact 10de:28a0 RTX 4060 Laptop only")
+                        help="include experimental 10de:28a0 subsystem 1d05:1274 revision a1 only")
     args = parser.parse_args()
     try:
         result = subprocess.run(["lspci", "-Dnn"], check=True, capture_output=True,
@@ -43,7 +60,7 @@ def main() -> int:
                  "2685": "RTX 4090 D (experimental)",
                  "2705": "RTX 4070 Ti SUPER (experimental)",
                  "2805": "RTX 4060 Ti 16GB (experimental)",
-                 "28a0": "RTX 4060 Laptop (experimental; one machine tested)"}[device]
+                 "28a0": "RTX 4060 Laptop (experimental; 1d05:1274 revision a1)"}[device]
         if device == "2685":
             options += " gpu_unlock.rtx4090d_experimental=1"
         if device == "2705":

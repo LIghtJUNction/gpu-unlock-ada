@@ -2,6 +2,7 @@
 """The read-only helper never suggests AD107M without explicit inclusion."""
 import importlib.util
 from pathlib import Path
+import tempfile
 import unittest
 from unittest import mock
 
@@ -17,6 +18,20 @@ PCI = """0000:0A:00.0 VGA compatible controller: NVIDIA [10de:28a0]
 
 
 class BootOptionTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.board = self.root / "0000:0a:00.0"
+        self.board.mkdir()
+        for name, value in {"vendor": "0x10de", "device": "0x28a0",
+                            "subsystem_vendor": "0x1d05", "subsystem_device": "0x1274",
+                            "revision": "0xa1"}.items():
+            (self.board / name).write_text(value)
+        patch = mock.patch.object(boot_option, "SYSFS_ROOT", self.root)
+        patch.start()
+        self.addCleanup(patch.stop)
+
     def test_exact28a0_is_optional_and_not_a_family_match(self):
         self.assertEqual(boot_option.candidates(PCI), [("0000:02:00.0", "2684")])
         self.assertEqual(boot_option.candidates(PCI, True),
@@ -32,3 +47,20 @@ class BootOptionTests(unittest.TestCase):
                                         capture_output=True, text=True, timeout=10)
             output.assert_any_call("gpu_unlock.targets=0000:0a:00.0 "
                                    "gpu_unlock.ad107_experimental=1")
+
+    def test_other_boards_and_revisions_are_not_suggested(self):
+        for name, value in (("subsystem_vendor", "0x1043"),
+                            ("subsystem_device", "0x1275"), ("revision", "0xa2")):
+            with self.subTest(name=name):
+                path = self.board / name
+                original = path.read_text()
+                path.write_text(value)
+                self.assertEqual(boot_option.candidates(PCI, True), [("0000:02:00.0", "2684")])
+                path.write_text(original)
+
+    def test_missing_or_invalid_identity_does_not_suggest_an_unlock(self):
+        path = self.board / "revision"
+        path.write_text("invalid")
+        self.assertFalse(boot_option.ad107_board_matches("0000:0a:00.0"))
+        path.unlink()
+        self.assertEqual(boot_option.candidates(PCI, True), [("0000:02:00.0", "2684")])

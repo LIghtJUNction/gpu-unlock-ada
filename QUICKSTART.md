@@ -1,5 +1,8 @@
 # GPU Unlock: quick start
 
+For LIghtJUNction's board-gated RTX 4060 Laptop fork, use the
+[personal setup and rollback guide](docs/lightjunction-28a0.md).
+
 This guide is for a Linux machine you control. The RTX 4070 Ti SUPER path is
 experimental and has been tested on **one** `10de:2705` card. RTX 4090
 `10de:2684` has a separate [single-card report](rtx4090-register-report.md).

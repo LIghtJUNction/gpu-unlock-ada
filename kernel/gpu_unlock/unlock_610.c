@@ -74,11 +74,7 @@ static const struct gpu_unlock_assets *unlock_assets(const struct pci_dev *pdev)
 		.arch = GU_BOOTER_AD10X, .boot_image_size = 36864,
 	};
 
-	return (pdev->device == GU_AD102_RTX_4090 ||
-		pdev->device == GU_AD102_RTX_4090_D ||
-		pdev->device == GU_AD103_RTX_4070_TI_SUPER ||
-		pdev->device == GU_AD106_RTX_4060_TI_16GB ||
-		pdev->device == GU_AD107_RTX_4060_LAPTOP) ? &ad102 : &ga102;
+	return gpu_unlock_uses_ad102(pdev->device) ? &ad102 : &ga102;
 }
 
 /* The two falcons this module ever touches. SEC2 is the secure boot engine
@@ -347,13 +343,7 @@ static bool inaccessible(u32 value)
 
 static bool is_ad102(const struct unlock_transaction_work *work)
 {
-	/* AD103, AD106 and AD107M use the same pinned AD102-family Booter archive.
-	 * Selection does not establish compatibility with every board. */
-	return work->pdev->device == GU_AD102_RTX_4090 ||
-	       work->pdev->device == GU_AD102_RTX_4090_D ||
-	       work->pdev->device == GU_AD103_RTX_4070_TI_SUPER ||
-	       work->pdev->device == GU_AD106_RTX_4060_TI_16GB ||
-	       work->pdev->device == GU_AD107_RTX_4060_LAPTOP;
+	return gpu_unlock_uses_ad102(work->pdev->device);
 }
 
 static const struct {
@@ -894,6 +884,20 @@ static int unlock_transaction_assets(struct unlock_transaction_work *work)
 		work->boot_desc.manifest_offset, ret);
 	release_firmware(desc);
 	return GU_RESULT(ret ? ret : load_booter(work));
+}
+
+static int unlock_transaction_identity(struct unlock_transaction_work *work)
+{
+	u32 chip;
+
+	if (work->pdev->device != GU_AD107_RTX_4060_LAPTOP)
+		return 0;
+	if (read_bar(work, 0, &chip) || chip != GU_AD107_PMC_BOOT_0) {
+		dev_err(&work->pdev->dev, "AD107 chip identity does not match the 1d05:1274 revision a1 profile\n");
+		return GU_RESULT(-ENODEV);
+	}
+	dev_info(&work->pdev->dev, "AD107 board verified: subsystem=1d05:1274 revision=a1 chip=%#x\n", chip);
+	return 0;
 }
 
 static int unlock_transaction_layout(struct unlock_transaction_work *work)
@@ -1725,6 +1729,11 @@ int gpu_unlock_610_unlock(struct pci_dev *pdev, const struct gpu_unlock_610_shar
 	struct unlock_transaction_work *work;
 	int ret, cleanup;
 
+	if (pdev->device == GU_AD107_RTX_4060_LAPTOP &&
+	    !gpu_unlock_ad107_board_matches(pdev)) {
+		dev_err(&pdev->dev, "AD107 requires subsystem 1d05:1274 revision a1\n");
+		return -EOPNOTSUPP;
+	}
 	work = kzalloc(sizeof(*work), GFP_KERNEL);
 	if (!work)
 		return -ENOMEM;
@@ -1733,6 +1742,8 @@ int gpu_unlock_610_unlock(struct pci_dev *pdev, const struct gpu_unlock_610_shar
 	ret = unlock_transaction_assets(work);
 	if (!ret)
 		ret = unlock_transaction_claim(work);
+	if (!ret)
+		ret = unlock_transaction_identity(work);
 	if (!ret)
 		ret = unlock_transaction_layout(work);
 	if (!ret)

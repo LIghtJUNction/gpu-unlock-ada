@@ -1,4 +1,14 @@
-# GPU unlock 1.1.1 — RTX 4090, RTX 4070 Ti SUPER and RTX 4060 Ti 16GB
+# LIghtJUNction GPU unlock 1.1.1.lj1
+
+Personal experimental RTX 4060 Laptop fork for **10de:28a0, subsystem
+1d05:1274, revision a1**. It adds exact-board and early chip-identity checks,
+keeps Ada asset selection and verification on one classifier, and provides
+`python3 tools/check_28a0.py` to verify actual rate readbacks.
+See the [Chinese setup, provenance and rollback guide](docs/lightjunction-28a0.md).
+This build has not yet been boot-tested on the owner's machine; upstream
+owners' results below do not establish this build's performance or stability.
+
+## Upstream GPU unlock 1.1.1 — RTX 4090, RTX 4070 Ti SUPER and RTX 4060 Ti 16GB
 
 New to this project? Start with the [copy-paste Quick Start](QUICKSTART.md).
 
@@ -91,7 +101,10 @@ same-card stock throughput run has been made yet. See the
 RTX 4060 Laptop `10de:28a0` is an **experimental exact AD107M target with
 owner evidence from one physical laptop**. It requires both
 `gpu_unlock.ad107_experimental=1` (default false) and a single exact PCI
-address; `targets=all` never selects it. Two observed unlocked boots with
+address; `targets=all` never selects it. This personal fork additionally
+requires subsystem `1d05:1274`, revision `a1` and chip ID `0x197000a1`.
+The following owner measurements are from abdecd's original experimental build.
+Two observed unlocked boots with
 stock rollback between them showed approximately 2× FP16/FP32 instruction
 rate; TF32/FP32 varied between 1.78× and 1.99× stock. BF16 was checked only
 numerically, not for throughput. These are not verified EC-power-removal cold
@@ -117,7 +130,7 @@ Clone the GPL-2.0-only source and build the packages locally so the pinned
 NVIDIA firmware is downloaded and generated on your own machine:
 
 ```sh
-git clone https://github.com/JustAResearcher/gpu-unlock-ada.git
+git clone https://github.com/LIghtJUNction/gpu-unlock-ada.git
 cd gpu-unlock-ada
 make install
 ```

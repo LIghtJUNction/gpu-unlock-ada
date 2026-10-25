@@ -2,8 +2,20 @@
 #ifndef GPU_UNLOCK_UNLOCK_610_H
 #define GPU_UNLOCK_UNLOCK_610_H
 
+#include <linux/pci.h>
+#include "arch_610.h"
+
 struct firmware;
 struct pci_dev;
+
+static inline bool gpu_unlock_ad107_board_matches(const struct pci_dev *pdev)
+{
+	return pdev->vendor == 0x10de &&
+	       pdev->device == GU_AD107_RTX_4060_LAPTOP &&
+	       pdev->subsystem_vendor == GU_AD107_SUBVENDOR &&
+	       pdev->subsystem_device == GU_AD107_SUBDEVICE &&
+	       pdev->revision == GU_AD107_REVISION;
+}
 
 /* Read-only firmware every unlock uses: loaded once, shared by concurrent unlocks. */
 struct gpu_unlock_610_shared {

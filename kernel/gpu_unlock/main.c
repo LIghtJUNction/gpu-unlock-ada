@@ -21,7 +21,7 @@ MODULE_PARM_DESC(ad106_experimental, "permit only the exact 10de:2805 AD106 targ
 
 static bool ad107_experimental;
 module_param(ad107_experimental, bool, 0444);
-MODULE_PARM_DESC(ad107_experimental, "permit only the exact 10de:28a0 AD107M laptop target with a single explicit PCI address");
+MODULE_PARM_DESC(ad107_experimental, "permit only 10de:28a0 subsystem 1d05:1274 revision a1 with a single explicit PCI address");
 
 static bool rtx4090d_experimental;
 module_param(rtx4090d_experimental, bool, 0444);
@@ -32,7 +32,7 @@ MODULE_PARM_DESC(rtx4090d_experimental, "permit experimental RTX 4090 D (10de:26
  */
 static const unsigned short supported_ids[] = {
 	/* AD102: GeForce RTX 4090 */
-	0x2684,
+	GU_AD102_RTX_4090,
 	/* GA102 */
 	0x2200, 0x2203, 0x2204, 0x2205, 0x2206, 0x2207, 0x2208, 0x220a,
 	0x220d, 0x2216, 0x222b, 0x222f,
@@ -63,7 +63,7 @@ static bool supported(const struct pci_dev *pdev)
 	if (pdev->device == GU_AD106_RTX_4060_TI_16GB)
 		return ad106_experimental;
 	if (pdev->device == GU_AD107_RTX_4060_LAPTOP)
-		return ad107_experimental;
+		return ad107_experimental && gpu_unlock_ad107_board_matches(pdev);
 	for (i = 0; i < ARRAY_SIZE(supported_ids); i++)
 		if (pdev->device == supported_ids[i])
 			return true;
@@ -183,5 +183,5 @@ static void __exit gpu_unlock_exit(void)
 module_init(gpu_unlock_init);
 module_exit(gpu_unlock_exit);
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("RTX 4090, experimental RTX 4070 Ti SUPER and supported GA10x pre-driver tensor unlock");
-MODULE_VERSION("1.1.1");
+MODULE_DESCRIPTION("LIghtJUNction RTX 4060 Laptop board-gated tensor unlock and upstream targets");
+MODULE_VERSION("1.1.1.lj1");
