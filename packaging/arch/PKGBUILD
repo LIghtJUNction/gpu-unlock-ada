@@ -49,6 +49,7 @@ package_gpu-unlock-dkms() {
   make DESTDIR="$pkgdir" install-dkms
   install -Dm644 packaging/boot/mkinitcpio.conf "$pkgdir/usr/share/doc/gpu-unlock/mkinitcpio.conf"
   install -Dm644 packaging/boot/mkinitcpio-experimental.conf "$pkgdir/usr/share/doc/gpu-unlock/mkinitcpio-experimental.conf"
+  install -Dm644 packaging/boot/mkinitcpio-28a0-intel.conf "$pkgdir/usr/share/doc/gpu-unlock/mkinitcpio-28a0-intel.conf"
   make DESTDIR="$pkgdir" PKG=$pkgname install-licenses
 }
 
