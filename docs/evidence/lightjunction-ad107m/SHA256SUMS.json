@@ -1,0 +1,12 @@
+{
+  "README.md": "b654bde20ec0adce7c627de585183d017fe3b6375661057abc5fba3d5a04afd5",
+  "boot-check.json": "b9e085bf0882ce869d1ec58f48eb18b19cf0f1563b03842b70921b64563caf7e",
+  "boot-transaction.txt": "23ac8f46950d3ebfa742543ed538d49f294f1cfe9519f3141da5531ab6c84a88",
+  "gemm.jsonl": "1cefec263c72c434db94cdd02ea48e01419ea2f57f143034a834729bbbceff33",
+  "metadata.json": "1c958dade8c2e5c0fa496d4ae9bae2a0feeb92c00308e713d0968cc878cec678",
+  "numerical.txt": "4201ce8483df7c000a61b705fe1b264907a41e874d8cfaab8a05a1c32b4a4c6e",
+  "rates-stock.json": "96e9b76acf1fba4882241c99fc514bce7a2be15049665221f8cd6e122f5ea523",
+  "rates-unlocked-after.json": "b68c95e9cfce0031f3b7cde7d03f6d8f725265b4746e5ce577dc7aca70990b4c",
+  "rates-unlocked-before.json": "b68c95e9cfce0031f3b7cde7d03f6d8f725265b4746e5ce577dc7aca70990b4c",
+  "telemetry.csv": "0222c920795affb72b35b075ea59249a57c0effa24a6fa22b4e4e3bafd95abc4"
+}

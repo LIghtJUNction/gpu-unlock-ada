@@ -1,0 +1,24 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "driver": "615.78.08",
+  "kernel": "7.2.11-arch1-1",
+  "boot_options": [
+    "gpu_unlock.targets=[selected GPU]",
+    "gpu_unlock.ad107_experimental=1",
+    "nvidia.NVreg_DynamicPowerManagement=0x00"
+  ],
+  "rates": {
+    "imla0": 0,
+    "fmla16": 0,
+    "dp": 0,
+    "fmla32": 0,
+    "ffma": 0,
+    "imla1": 0,
+    "imla2": 0,
+    "imla3": 0,
+    "imla4": 0
+  },
+  "tensor_fp32_full_rate": true,
+  "meaning": "0=full rate; 1=half rate; this is a driver readback, not a performance benchmark",
+  "hardware_changes": false
+}

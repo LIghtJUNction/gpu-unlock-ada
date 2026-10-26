@@ -5,8 +5,12 @@ Personal experimental RTX 4060 Laptop fork for **10de:28a0, subsystem
 keeps Ada asset selection and verification on one classifier, and provides
 `python3 tools/check_28a0.py` to verify actual rate readbacks.
 See the [Chinese setup, provenance and rollback guide](docs/lightjunction-28a0.md).
-This build has not yet been boot-tested on the owner's machine; upstream
-owners' results below do not establish this build's performance or stability.
+The owner's guarded build completed one observed boot on 2026-10-26: the
+NVIDIA rate getter changed the three target fields from half to full rate,
+six seeded FP16/BF16 correctness cases and six larger cuBLAS GEMM cases passed,
+and no Xid errors were logged through those checks. Two SBIOS interface
+assertions remain recorded. There is no matched stock throughput run or
+long-term stability result. See the [local boot evidence and limits](docs/evidence/lightjunction-ad107m/README.md).
 
 ## Upstream GPU unlock 1.1.1 — RTX 4090, RTX 4070 Ti SUPER and RTX 4060 Ti 16GB
 

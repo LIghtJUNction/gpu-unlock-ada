@@ -1,0 +1,18 @@
+{
+  "xid_errors": [],
+  "driver_assertions": [
+    "NVRM: GPU0 nvAssertOkFailedNoLog: Assertion failed: Invalid data passed [NV_ERR_INVALID_DATA] (0x00000025) returned from PlatformRequestHandler failed to get target temp from SBIOS @ platform_request_handler_ctrl.c:2175",
+    "NVRM: GPU0 nvAssertOkFailedNoLog: Assertion failed: Invalid data passed [NV_ERR_INVALID_DATA] (0x00000025) returned from PlatformRequestHandler failed to get platform power mode from SBIOS @ platform_request_handler_ctrl.c:2118"
+  ],
+  "unlock_success": true,
+  "board_verified": true,
+  "source_commit": "3fe95e3ac6e83d3445d8da889670c6a96cc2375a",
+  "module_version": "1.1.1.lj1",
+  "module_srcversion": "7C3FB427DB90E00CE54CC05",
+  "experiment_image_sha256": "3a57a48bd7e4a62978d902e513f597c742b9660b964a54362f5fb808e44e1abd",
+  "driver_assertions_added_during_workloads": 0,
+  "cold_power_removal_verified": false,
+  "observed_experimental_boots": 1,
+  "default_entry": "Omarchy/linux",
+  "nvidia_powerd_active": true
+}

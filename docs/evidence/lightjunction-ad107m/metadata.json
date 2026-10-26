@@ -1,0 +1,73 @@
+{
+  "claim": "One boot of the guarded fork: rate readback and exercised GEMM correctness; no measured speedup claim.",
+  "time": "2026-10-26T08:09:20.244649+00:00",
+  "source_commit": "3fe95e3ac6e83d3445d8da889670c6a96cc2375a",
+  "kernel": "7.2.11-arch1-1",
+  "module_version": "1.1.1.lj1",
+  "module_srcversion": "7C3FB427DB90E00CE54CC05",
+  "cpu_count": 24,
+  "loadavg": "7.85 5.89 3.32 4/3940 51428",
+  "desktop_active": true,
+  "exclusive_gpu": false,
+  "cold_power_removal_verified": false,
+  "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Tue_Sep_01_08:45:21_PDT_2026\nCuda compilation tools, release 13.4, V13.4.92\nBuild cuda_13.4.r13.4/compiler.38855100_0\n",
+  "binaries": {
+    "validate_gemm": "d5eb5cf9ffa932ba9c047e978599cef5a1b77f49900a37611e1aa0fc0be32f40",
+    "gemm_bench": "ad1e252302655b8c5a07a38952c21d934919ff901ee490610a4e7b16d52d22f0"
+  },
+  "validation_sources": {
+    "diagnostics/bench/validate_gemm.cu": "06071e4ae031aaf8b87a0abbd570211b226b68dadb723007e4fe2bdffa853992",
+    "diagnostics/bench/gemm_inputs.h": "c6005990cbc8ebc584e46ceca6b04a86213bd8399bb59bad3881a9c3b86a436d",
+    "docs/evidence/rtx4090-pr1-stock/gemm_bench.cu": "c35ec706f9587b9749bf369a35d4dfca9e88c666c4582726490e0138cdd6e240"
+  },
+  "status": "boot-unlocked-numerical-passed-no-xid",
+  "duration_seconds": 23.481595321999976,
+  "seeded_cases_passed": 6,
+  "large_gemm_cases_passed": 6,
+  "large_gemm_cells_checked": 169869312,
+  "telemetry_summary": {
+    "temperature.gpu": {
+      "samples": 33,
+      "min": 64.0,
+      "median": 78.0,
+      "max": 82.0
+    },
+    "power.draw [W]": {
+      "samples": 33,
+      "min": 27.57,
+      "median": 73.56,
+      "max": 81.79
+    },
+    "enforced.power.limit [W]": {
+      "samples": 33,
+      "min": 120.0,
+      "median": 120.0,
+      "max": 120.0
+    },
+    "clocks.current.sm [MHz]": {
+      "samples": 33,
+      "min": 2565.0,
+      "median": 2580.0,
+      "max": 2595.0
+    },
+    "utilization.gpu [%]": {
+      "samples": 33,
+      "min": 53.0,
+      "median": 100.0,
+      "max": 100.0
+    }
+  },
+  "matched_stock_throughput_available": false,
+  "seeded_cells_checked": 159870,
+  "large_gemm_calls": 660,
+  "performance_verdict": "Inconclusive: no stock throughput run, active desktop, and no bottleneck profile.",
+  "raw_private_record": "retained locally; private path omitted",
+  "build_commands": [
+    "nvcc -O3 -arch=sm_89 -std=c++17 -o validate_gemm diagnostics/bench/validate_gemm.cu -lcublas",
+    "nvcc -O3 -arch=sm_89 -std=c++17 -o gemm_bench docs/evidence/rtx4090-pr1-stock/gemm_bench.cu -lcublas"
+  ],
+  "run_commands": [
+    "CUDA_VISIBLE_DEVICES=<selected-GPU-UUID> ./validate_gemm",
+    "CUDA_VISIBLE_DEVICES=<selected-GPU-UUID> ./gemm_bench"
+  ]
+}
